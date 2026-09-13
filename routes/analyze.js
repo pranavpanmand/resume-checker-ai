@@ -9,10 +9,61 @@ const upload = multer({ storage: multer.memoryStorage() });
 // Initialize Gemini SDK
 const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
 
-// Use a broadly supported model to prevent 404 errors on certain API keys
-const model = genAI.getGenerativeModel({
-  model: "gemini-2.5-flash",
-});
+// Models to try in order of preference (fallback chain)
+const MODEL_CANDIDATES = [
+  "gemini-2.5-flash",
+  "gemini-2.5-flash-lite",
+  "gemini-2.5-pro",
+  "gemini-flash-latest",
+  "gemini-flash-lite-latest",
+  "gemini-pro-latest",
+];
+
+// Helper: attempt a single model call with timeout
+async function tryModel(modelName, prompt) {
+  const model = genAI.getGenerativeModel({ model: modelName });
+  const result = await model.generateContent(prompt);
+  return result.response.text();
+}
+
+// Helper: sleep for ms
+function sleep(ms) {
+  return new Promise((resolve) => setTimeout(resolve, ms));
+}
+
+// Core function: try all models with retries
+async function generateWithFallback(prompt) {
+  for (const modelName of MODEL_CANDIDATES) {
+    for (let attempt = 1; attempt <= 2; attempt++) {
+      try {
+        console.log(`🔄 Trying model: ${modelName} (attempt ${attempt})`);
+        const text = await tryModel(modelName, prompt);
+        console.log(`✅ Success with model: ${modelName}`);
+        return text;
+      } catch (err) {
+        const status = err.status || 0;
+        console.error(`❌ ${modelName} attempt ${attempt} failed: ${status} ${err.statusText || err.message}`);
+
+        // 503 = temporary overload, worth retrying same model after a short wait
+        if (status === 503 && attempt < 2) {
+          console.log("   ⏳ Waiting 2s before retry...");
+          await sleep(2000);
+          continue;
+        }
+        // 404 = model not available for this key, skip to next model immediately
+        if (status === 404) break;
+        // 429 = rate limit, wait longer then try next model
+        if (status === 429) {
+          await sleep(3000);
+          break;
+        }
+        // Any other error on last attempt, try next model
+        break;
+      }
+    }
+  }
+  throw new Error("All Gemini models failed. Please try again later.");
+}
 
 router.post("/", upload.single("resume"), async (req, res) => {
   try {
@@ -33,9 +84,8 @@ router.post("/", upload.single("resume"), async (req, res) => {
       } else {
         resumeText = req.file.buffer.toString("utf-8");
       }
-    } else if (req.body.resume && typeof req.body.resume === 'string') {
-        // Fallback if resume is sent as text
-        resumeText = req.body.resume;
+    } else if (req.body.resume && typeof req.body.resume === "string") {
+      resumeText = req.body.resume;
     }
 
     if (resumeText.trim().length < 50) {
@@ -59,24 +109,23 @@ Job Description:
 ${jobDescription}
 `;
 
-    const result = await model.generateContent(prompt);
-    let text = result.response.text();
-    
+    const rawText = await generateWithFallback(prompt);
+
     // Clean up potential markdown formatting from the response
-    text = text.replace(/```json/gi, '').replace(/```/g, '').trim();
+    const cleaned = rawText.replace(/```json/gi, "").replace(/```/g, "").trim();
 
     let analysis;
     try {
-      analysis = JSON.parse(text);
+      analysis = JSON.parse(cleaned);
     } catch (e) {
-      console.error("❌ RAW GEMINI RESPONSE:", text);
+      console.error("❌ RAW GEMINI RESPONSE:", cleaned);
       return res.status(500).json({ error: "Invalid AI response format." });
     }
 
     res.json(analysis);
   } catch (err) {
-    console.error("GEMINI ERROR:", err);
-    res.status(500).json({ error: "Gemini analysis failed. Please try again." });
+    console.error("GEMINI ERROR:", err.message || err);
+    res.status(500).json({ error: err.message || "Gemini analysis failed. Please try again." });
   }
 });
 
