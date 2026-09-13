@@ -94,8 +94,10 @@ router.post("/", upload.single("resume"), async (req, res) => {
 
     const prompt = `
 You are an expert ATS (Applicant Tracking System) AI. 
-Analyze the provided resume against the job description.
+First, evaluate if the provided Resume and Job Description are valid and not just random text. 
+If either of them is invalid, nonsensical, or clearly not a real resume/job description, return EXACTLY this JSON: {"error": "Invalid Resume or Job Description provided. Please provide real text."}
 
+If they are valid, analyze the provided resume against the job description.
 Return ONLY valid minified JSON in the exact format below.
 No explanation. No markdown. No code blocks.
 
@@ -120,6 +122,10 @@ ${jobDescription}
     } catch (e) {
       console.error("❌ RAW GEMINI RESPONSE:", cleaned);
       return res.status(500).json({ error: "Invalid AI response format." });
+    }
+
+    if (analysis.error) {
+      return res.status(400).json({ error: analysis.error });
     }
 
     res.json(analysis);
