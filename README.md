@@ -75,3 +75,7 @@ The application features a sleek, premium dark-mode aesthetic utilizing:
 2. **Add Job Description:** Paste the job description you are targeting into the designated text area.
 3. **Analyze:** Click the **✨ Analyze Resume** button.
 4. **Review Results:** Wait for the AI to process (indicated by a loading spinner) and review your ATS Score, Matched Skills, and Missing Skills!
+
+---
+
+**Made by me:** [Pranav Panmand](https://pranav-panmand-portfolio.netlify.app/)
