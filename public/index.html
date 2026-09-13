@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <meta name="description" content="Resume Checker AI - Get instant, AI-powered feedback on your resume with ATS optimization.">
+  <title>Resume Checker AI</title>
+
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&family=Inter:wght@400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+  <!-- Ambient Background Elements -->
+  <div class="ambient-glow glow-1"></div>
+  <div class="ambient-glow glow-2"></div>
+
+  <div class="container">
+    <header class="header">
+      <div class="badge">Powered by Gemini AI ✨</div>
+      <h1>Resume Checker AI</h1>
+      <p>
+        Get instant, AI-powered feedback on your resume with ATS optimization
+        and industry-standard recommendations.
+      </p>
+    </header>
+
+    <main class="main-content">
+      <div class="card" id="upload-card">
+        <div class="section-title">
+          <span class="icon">📄</span> Upload Your Resume
+        </div>
+        <div class="section-sub">
+          Upload your resume file or paste the text below to begin analysis.
+        </div>
+
+        <div class="upload-box" id="drop-zone">
+          <div class="upload-icon">
+            <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="17 8 12 3 7 8"></polyline><line x1="12" y1="3" x2="12" y2="15"></line></svg>
+          </div>
+          <span class="upload-text">Click to upload or drag and drop</span>
+          <small>Supported formats: TXT, PDF (MAX. 5MB)</small>
+        </div>
+
+        <div class="divider"><span>OR</span></div>
+        <textarea id="resumeText" placeholder="Paste your resume content here..."></textarea>
+      </div>
+
+      <div class="card" id="job-card">
+        <div class="section-title">
+          <span class="icon">🎯</span> Job Description
+        </div>
+        <div class="section-sub">
+          Add the job description to get tailored keyword matching and role-specific feedback.
+        </div>
+        <textarea id="jobDescription" placeholder="Paste the job description here..."></textarea>
+      </div>
+
+      <button class="analyze-btn" id="analyzeBtn">
+        <span class="btn-text">✨ Analyze Resume</span>
+        <div class="loader-spinner hidden" id="btnLoader"></div>
+      </button>
+
+      <div id="results" class="results hidden card">
+        <div class="results-header">
+          <h2>Analysis Results</h2>
+        </div>
+        <div class="score-container">
+          <div class="score-circle">
+            <svg viewBox="0 0 36 36" class="circular-chart">
+              <path class="circle-bg"
+                d="M18 2.0845
+                  a 15.9155 15.9155 0 0 1 0 31.831
+                  a 15.9155 15.9155 0 0 1 0 -31.831"
+              />
+              <path class="circle" id="scoreCirclePath"
+                stroke-dasharray="0, 100"
+                d="M18 2.0845
+                  a 15.9155 15.9155 0 0 1 0 31.831
+                  a 15.9155 15.9155 0 0 1 0 -31.831"
+              />
+              <text x="18" y="20.35" class="percentage" id="atsScore">0</text>
+            </svg>
+          </div>
+          <div class="score-label">ATS Score</div>
+        </div>
+
+        <div class="skills">
+          <div class="skills-column matched-skills">
+            <h3><span class="icon">✅</span> Matched Skills</h3>
+            <ul id="matchedSkills"></ul>
+          </div>
+          <div class="skills-column missing-skills">
+            <h3><span class="icon">❌</span> Missing Skills</h3>
+            <ul id="missingSkills"></ul>
+          </div>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <script src="script.js"></script>
+</body>
+</html>
