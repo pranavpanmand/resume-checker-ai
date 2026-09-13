@@ -14,6 +14,7 @@ const missingSkillsUl = document.getElementById('missingSkills');
 const scoreDesc = document.getElementById('scoreDesc');
 const analyzeAgainBtn = document.getElementById('analyzeAgainBtn');
 const uploadProgress = document.getElementById('uploadProgress');
+const inputsGrid = document.getElementById('inputsGrid');
 
 let selectedFile = null;
 
@@ -227,12 +228,11 @@ analyzeBtn.addEventListener('click', async () => {
         ? data.missingSkills.map(skill => `<li>${skill}</li>`).join('')
         : '<li>No missing skills identified</li>';
 
+      // Hide inputs and button to fit everything on one page without scrolling
+      inputsGrid.classList.add('hidden');
+      analyzeBtn.classList.add('hidden');
+      
       resultsDiv.classList.remove('hidden');
-
-      // Smooth scroll to results
-      setTimeout(() => {
-        resultsDiv.scrollIntoView({ behavior: 'smooth', block: 'start' });
-      }, 100);
     } else {
       alert(data.error || 'Failed to analyze resume.');
     }
@@ -249,12 +249,16 @@ analyzeBtn.addEventListener('click', async () => {
 // ─── Analyze Again Button ───
 analyzeAgainBtn.addEventListener('click', () => {
   resultsDiv.classList.add('hidden');
+  
+  // Show inputs back
+  inputsGrid.classList.remove('hidden');
+  analyzeBtn.classList.remove('hidden');
+  
   resumeTextarea.value = '';
   jobDescriptionTextarea.value = '';
   selectedFile = null;
-  uploadText.textContent = 'Click to upload or drag and drop';
+  uploadText.textContent = 'Drag & drop or click';
   uploadBox.classList.remove('file-selected');
   uploadBox.style.borderColor = '';
   setActiveStep(1);
-  window.scrollTo({ top: 0, behavior: 'smooth' });
 });

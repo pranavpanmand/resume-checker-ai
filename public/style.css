@@ -100,7 +100,7 @@ body {
 /* ─── Container ─── */
 .container {
   width: 100%;
-  max-width: 780px;
+  max-width: 1000px;
   position: relative;
   z-index: 1;
 }
@@ -776,7 +776,20 @@ textarea:focus {
   color: var(--text-muted);
 }
 
+/* ─── Inputs Grid ─── */
+.inputs-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 24px;
+}
+
 /* ─── Responsive ─── */
+@media (max-width: 850px) {
+  .inputs-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
 @media (max-width: 640px) {
   .header h1 {
     font-size: 36px;
